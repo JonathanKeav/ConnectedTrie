@@ -12,7 +12,7 @@ Above is an image that will demonstrate the lookup process. Given the entities s
 
 ## Usage
 
-Targets .NET 6. Open `ConnectedTrie/ConnectedTrie.sln`, or reference the project from your own solution.
+Targets .NET 8. Open `ConnectedTrie/ConnectedTrie.sln`, or reference the project from your own solution.
 
 ```csharp
 var trie = new ConnectedTrie<string>();
@@ -24,4 +24,12 @@ Guid couldDont = trie.Add("could", "dont", "could:dont");
 List<string> matches = trie.Lookup("cantxyz", "dontxyz"); // ["cant:do"]
 
 trie.Remove("cant", "do", cantDo);
+```
+
+## Tests
+
+The xUnit tests in `ConnectedTrie/ConnectedTrie.Tests` cover adding, lookup order, entries without a B-string, removal and concurrent use.
+
+```bash
+dotnet test ConnectedTrie/ConnectedTrie.sln
 ```

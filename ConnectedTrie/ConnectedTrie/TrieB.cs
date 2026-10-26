@@ -52,6 +52,18 @@ namespace ConnectedTrie
 
 
 
+        public bool TryGetEntry(string str, Guid id, out TrieEntry<T> entry)
+        {
+            var leafNode = this.Get(str);
+            if (leafNode == null)
+            {
+                entry = null;
+                return false;
+            }
+
+            return leafNode.TryGetEntry(id, out entry);
+        }
+
         public TrieBNode<T> Get(string str)
         {
             TrieBNode<T> currentNode = root; ;
@@ -69,10 +81,9 @@ namespace ConnectedTrie
         public TrieBNode<T> Search(string str)
         {
             TrieBNode<T> currentNode = root;
-            TrieBNode<T> nextNode = null;
             foreach (var c in str)
             {
-                nextNode = currentNode.GetChild(c);
+                var nextNode = currentNode.GetChild(c);
 
                 if (nextNode == null)
                     return currentNode;
@@ -80,7 +91,7 @@ namespace ConnectedTrie
                     currentNode = nextNode;
 
             }
-            return nextNode;
+            return currentNode;
         }
     }
 }
