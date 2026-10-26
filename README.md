@@ -8,3 +8,20 @@ When checking if a particular pair of strings match to an entity we traverse the
 ![image](https://github.com/JonathanKeav/ConnectedTrie/blob/master/Connected%20Trie.drawio.png?raw=true)
 
 Above is an image that will demonstrate the lookup process. Given the entities shown in the image, and given an A-string of “cantxyz” and a B-string of “dontxyz” we would traverse the B-Trie down four nodes, “d”, “o”, ”n” and “t”. We cannot descend any further, so we move to the connected leaf node in the A-Trie and try to “climb” to the root node. The first check will fail as the node contains the character “d” and the 5th character in the A-string “cantxyz” is “x”. We are comparing the 5th character as the “d” node is 5 deep in the A-Trie and therefore should be matched to the 5th character. As we did not make a match with the “could-dont” entity we move back up the B-Trie from the current node “t” to ”n” and then “o”. “o” is a leaf node as it has an entity, so we move to the connected leaf node in the A-Trie and try to “climb” to the root node. This time the climb from “t” to “n” to “a” and finally to “c” is successful. And we consider A-String of “cantxyz” and a B-string of “dontxyz” as matched to the “cant:do” entity.
+
+
+## Usage
+
+Targets .NET 6. Open `ConnectedTrie/ConnectedTrie.sln`, or reference the project from your own solution.
+
+```csharp
+var trie = new ConnectedTrie<string>();
+
+Guid cantDo    = trie.Add("cant",  "do",   "cant:do");
+Guid couldDont = trie.Add("could", "dont", "could:dont");
+
+// Longest matching pair of prefixes, as in the example above
+List<string> matches = trie.Lookup("cantxyz", "dontxyz"); // ["cant:do"]
+
+trie.Remove("cant", "do", cantDo);
+```
