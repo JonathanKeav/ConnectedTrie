@@ -16,7 +16,7 @@
             Guid returnValue;
             
             if (string.IsNullOrEmpty(APrefix))
-                throw new Exception("Cannot load empty ANumber into trie");
+                throw new ArgumentException("Cannot load empty ANumber into trie", nameof(APrefix));
 
             cacheLock.EnterWriteLock();
             try
@@ -38,19 +38,30 @@
 
         public bool Remove(string APrefix, string BPrefix, Guid id)
         {
+            if (string.IsNullOrEmpty(APrefix))
+                return false;
+
             cacheLock.EnterWriteLock();
             try
             {
-                bool bGone;
+                // Check the entry is in both tries before removing it from either, so a wrong
+                // prefix can't leave it half removed
+                if (!aTrie.TryGetEntry(APrefix, id, out TrieEntry<T> entry))
+                    return false;
 
                 if (string.IsNullOrEmpty(BPrefix))
-                    bGone = true;
-                else
-                    bGone = bTrie.Remove(BPrefix, id);
+                {
+                    if (entry.BParentNode != null)
+                        return false;
+                }
+                else if (!bTrie.TryGetEntry(BPrefix, id, out _))
+                    return false;
 
-                var aGone = aTrie.Remove(APrefix, id);
+                aTrie.Remove(APrefix, id);
+                if (!string.IsNullOrEmpty(BPrefix))
+                    bTrie.Remove(BPrefix, id);
 
-                return aGone & bGone;
+                return true;
             }
             finally
             {
@@ -62,14 +73,14 @@
         {
             // Need a non-null APrefix to search. 
             if (string.IsNullOrEmpty(APrefix))
-                throw new Exception("Need a non-null APrefix to search");
+                throw new ArgumentException("Need a non-null APrefix to search", nameof(APrefix));
 
             var returnList = new List<T>();
 
             cacheLock.EnterReadLock();
             try
             {
-                var currentBNode = bTrie.Search(BPrefix);
+                var currentBNode = bTrie.Search(BPrefix ?? string.Empty);
                 while (!currentBNode.IsRoot)
                 {
                     var entries = currentBNode.GetEntry().OrderByDescending(x => x.AParentNode.Depth);
